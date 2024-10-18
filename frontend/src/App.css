@@ -1,0 +1,45 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.headline {
+    font-size: 48px;
+}
+
+.btn-toggle {
+    padding: 8px;
+    border-radius: 2px;
+}
+.btn-toggle.active {
+    background-color: aqua;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    border-radius: 16px;
+    border: 2px solid;
+    width: fit-content;
+    padding: 2px 4px;
+    gap: 4px;
+}
+.icon {
+    width: 20px;
+}
+.search-container .text-input {
+    border: none;
+    outline: none;
+}
+
+.loading-container {
+    display: flex;
+    gap: 8px;
+}
+.ranking-top {
+    color: green;
+}
+.ranking-bottom {
+    color: red;
+}
