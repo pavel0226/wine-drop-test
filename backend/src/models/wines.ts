@@ -1,14 +1,18 @@
-import { Wine } from "../types"
-import { FastifyInstance } from "fastify"
+import { Wine } from "../types";
+import { FastifyInstance } from "fastify";
 
-export const getWinesByRevenue = async (fastify: FastifyInstance, query: string): Promise<Wine[]> => {
-    const sql = `
+export const getWinesByRevenue = async (
+  fastify: FastifyInstance,
+  query: string
+): Promise<Wine[]> => {
+  const sql = `
         WITH RankedWines AS (
             SELECT 
                 mw.id,
                 mw.name,
                 mw.vintage,
-                SUM(co.total_amount) AS total_revenue
+                SUM(co.total_amount) AS total_revenue,
+                ROW_NUMBER() OVER (ORDER BY SUM(co.total_amount) DESC) AS rank
             FROM 
                 master_wine mw
             JOIN 
@@ -21,8 +25,8 @@ export const getWinesByRevenue = async (fastify: FastifyInstance, query: string)
                 mw.id, mw.name, mw.vintage
         )
         SELECT 
-            ROW_NUMBER() OVER (ORDER BY total_revenue DESC) AS rank,
             rw.id,
+            rw.rank,
             rw.name,
             rw.vintage,
             rw.total_revenue
@@ -34,29 +38,34 @@ export const getWinesByRevenue = async (fastify: FastifyInstance, query: string)
             total_revenue DESC;
     `;
 
-    try {
-        const result = await fastify.db.all(sql, [query, query]);
-        return result.map((row: any) => ({
-            id: row.id,
-            name: row.name,
-            vintage: row.vintage,
-            total_revenue: row.total_revenue,
-        }));
-    } catch (error) {
-        fastify.log.error(error);
-        throw new Error('Failed to retrieve wines by revenue');
-    }
-}
+  try {
+    const result = await fastify.db.all(sql, [query, query]);
+    return result.map((row: any) => ({
+      id: row.id,
+      rank: row.rank,
+      name: row.name,
+      vintage: row.vintage,
+      total_revenue: row.total_revenue,
+    }));
+  } catch (error) {
+    fastify.log.error(error);
+    throw new Error("Failed to retrieve wines by revenue");
+  }
+};
 
-export const getWinesBySold = async (fastify: FastifyInstance, query: string): Promise<Wine[]> => {
-    const sql = `
+export const getWinesBySold = async (
+  fastify: FastifyInstance,
+  query: string
+): Promise<Wine[]> => {
+  const sql = `
         WITH SoldWines AS (
             SELECT 
                 mw.id,
                 mw.name,
                 mw.vintage,
+                SUM(co.quantity) AS total_quantity,
                 SUM(co.total_amount) AS total_revenue,
-                SUM(co.quantity) AS total_quantity
+                ROW_NUMBER() OVER (ORDER BY SUM(co.quantity) DESC) AS rank
             FROM 
                 master_wine mw
             JOIN 
@@ -69,8 +78,8 @@ export const getWinesBySold = async (fastify: FastifyInstance, query: string): P
                 mw.id, mw.name, mw.vintage
         )
         SELECT 
-            ROW_NUMBER() OVER (ORDER BY total_quantity DESC) AS rank,
             sw.id,
+            sw.rank,
             sw.name,
             sw.vintage,
             sw.total_revenue,
@@ -82,29 +91,34 @@ export const getWinesBySold = async (fastify: FastifyInstance, query: string): P
         ORDER BY 
             total_quantity DESC;
     `;
-    try {
-        const result = await fastify.db.all(sql, [query, query]);
-        return result.map((row: any) => ({
-            id: row.id,
-            name: row.name,
-            vintage: row.vintage,
-            total_revenue: row.total_revenue,
-        }));
-    } catch (error) {
-        fastify.log.error(error);
-        throw new Error('Failed to retrieve wines by revenue');
-    }
-}
+  try {
+    const result = await fastify.db.all(sql, [query, query]);
+    return result.map((row: any) => ({
+      id: row.id,
+      rank: row.rank,
+      name: row.name,
+      vintage: row.vintage,
+      total_revenue: row.total_revenue,
+    }));
+  } catch (error) {
+    fastify.log.error(error);
+    throw new Error("Failed to retrieve wines by revenue");
+  }
+};
 
-export const getWinesByOrders = async (fastify: FastifyInstance, query: string): Promise<Wine[]> => {
-    const sql = `
+export const getWinesByOrders = async (
+  fastify: FastifyInstance,
+  query: string
+): Promise<Wine[]> => {
+  const sql = `
         WITH OrderedWines AS (
             SELECT 
                 mw.id,
                 mw.name,
                 mw.vintage,
+                SUM(co.quantity) AS total_quantity,
                 SUM(co.total_amount) AS total_revenue,
-                SUM(co.quantity) AS total_quantity
+                ROW_NUMBER() OVER (ORDER BY SUM(co.quantity) DESC) AS rank
             FROM 
                 master_wine mw
             JOIN 
@@ -115,8 +129,8 @@ export const getWinesByOrders = async (fastify: FastifyInstance, query: string):
                 mw.id, mw.name, mw.vintage
         )
         SELECT 
-            ROW_NUMBER() OVER (ORDER BY total_quantity DESC) AS rank,
             ow.id,
+            ow.rank,
             ow.name,
             ow.vintage,
             ow.total_revenue,
@@ -128,16 +142,17 @@ export const getWinesByOrders = async (fastify: FastifyInstance, query: string):
         ORDER BY 
             total_quantity DESC;
     `;
-    try {
-        const result = await fastify.db.all(sql, [query, query]);
-        return result.map((row: any) => ({
-            id: row.id,
-            name: row.name,
-            vintage: row.vintage,
-            total_revenue: row.total_revenue,
-        }));
-    } catch (error) {
-        fastify.log.error(error);
-        throw new Error('Failed to retrieve wines by revenue');
-    }
-}
+  try {
+    const result = await fastify.db.all(sql, [query, query]);
+    return result.map((row: any) => ({
+      id: row.id,
+      rank: row.rank,
+      name: row.name,
+      vintage: row.vintage,
+      total_revenue: row.total_revenue,
+    }));
+  } catch (error) {
+    fastify.log.error(error);
+    throw new Error("Failed to retrieve wines by revenue");
+  }
+};

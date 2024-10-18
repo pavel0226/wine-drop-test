@@ -1,19 +1,19 @@
 import Fastify from "fastify";
-import cors from '@fastify/cors';
-import dotenv from '@fastify/env';
+import cors from "@fastify/cors";
+import dotenv from "@fastify/env";
 import sqlitePlugin from "fastify-sqlite-typed";
 
-import { wineRoutes } from './routes/wines';
+import { wineRoutes } from "./routes/wines";
 import { Env } from "./types";
 
 const envSchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    PORT: { type: 'integer' },
-    FRONTEND_URL: { type: 'string' },
-    DATABASE_URL: { type: 'string' },
+    PORT: { type: "integer" },
+    FRONTEND_URL: { type: "string" },
+    DATABASE_URL: { type: "string" },
   },
-  required: ['PORT', 'FRONTEND_URL', 'DATABASE_URL'],
+  required: ["PORT", "FRONTEND_URL", "DATABASE_URL"],
 };
 
 (async () => {
@@ -21,10 +21,10 @@ const envSchema = {
   const fastify = Fastify({
     logger: {
       transport: {
-        target: 'pino-pretty',
+        target: "pino-pretty",
         options: {
-          translateTime: 'HH:MM:ss Z',
-          ignore: 'pid,hostname',
+          translateTime: "HH:MM:ss Z",
+          ignore: "pid,hostname",
         },
       },
     },
@@ -34,8 +34,8 @@ const envSchema = {
   await fastify.register(dotenv, {
     schema: envSchema,
     dotenv: {
-      path: `${__dirname}/../.env`
-    }
+      path: `${__dirname}/../.env`,
+    },
   });
 
   const envs = fastify.getEnvs<Env>();
@@ -51,7 +51,7 @@ const envSchema = {
   });
 
   // Routes register
-  fastify.register(wineRoutes, { prefix: '/api' });
+  fastify.register(wineRoutes, { prefix: "/api" });
 
   try {
     const port = parseInt(envs.PORT, 10);
